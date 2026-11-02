@@ -11,20 +11,25 @@ export function Magnetic({ children, strength = 0.35, className = '' }: { childr
   const x = useSpring(0, { stiffness: 220, damping: 18 });
   const y = useSpring(0, { stiffness: 220, damping: 18 });
   const active = fine && !reduced;
+  const rectRef = useRef<DOMRect | null>(null);
 
+  const onEnter = (e: RPointerEvent<HTMLSpanElement>) => {
+    rectRef.current = e.currentTarget.getBoundingClientRect();
+  };
   const onMove = (e: RPointerEvent<HTMLSpanElement>) => {
     if (!active) return;
-    const r = e.currentTarget.getBoundingClientRect();
+    const r = rectRef.current ?? e.currentTarget.getBoundingClientRect();
     x.set((e.clientX - (r.left + r.width / 2)) * strength);
     y.set((e.clientY - (r.top + r.height / 2)) * strength);
   };
   const reset = () => {
+    rectRef.current = null;
     x.set(0);
     y.set(0);
   };
 
   return (
-    <motion.span className={`inline-flex ${className}`} style={{ x, y }} onPointerMove={onMove} onPointerLeave={reset}>
+    <motion.span className={`inline-flex ${className}`} style={{ x, y }} onPointerEnter={onEnter} onPointerMove={onMove} onPointerLeave={reset}>
       {children}
     </motion.span>
   );
@@ -48,22 +53,31 @@ export function Tilt({
   const gx = useTransform(px, (v) => `${v * 100}%`);
   const gy = useTransform(py, (v) => `${v * 100}%`);
   const glareBg = useTransform([gx, gy], ([a, b]) => `radial-gradient(circle at ${a} ${b}, rgba(255,255,255,0.16), transparent 55%)`);
+  const rectRef = useRef<DOMRect | null>(null);
+
+  const onEnter = (e: RPointerEvent<HTMLDivElement>) => {
+    rectRef.current = e.currentTarget.getBoundingClientRect();
+  };
+  const onMove = (e: RPointerEvent<HTMLDivElement>) => {
+    if (!active) return;
+    const r = rectRef.current ?? e.currentTarget.getBoundingClientRect();
+    px.set((e.clientX - r.left) / r.width);
+    py.set((e.clientY - r.top) / r.height);
+  };
+  const onLeave = () => {
+    rectRef.current = null;
+    px.set(0.5);
+    py.set(0.5);
+  };
 
   return (
     <motion.div
       {...rest}
       className={`relative [transform-style:preserve-3d] ${className}`}
       style={active ? { rotateX: rx, rotateY: ry, transformPerspective: 1000, ...(rest.style as object) } : rest.style}
-      onPointerMove={(e) => {
-        if (!active) return;
-        const r = e.currentTarget.getBoundingClientRect();
-        px.set((e.clientX - r.left) / r.width);
-        py.set((e.clientY - r.top) / r.height);
-      }}
-      onPointerLeave={() => {
-        px.set(0.5);
-        py.set(0.5);
-      }}
+      onPointerEnter={onEnter}
+      onPointerMove={onMove}
+      onPointerLeave={onLeave}
     >
       {children}
       {active && glare && (

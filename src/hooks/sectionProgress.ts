@@ -30,22 +30,16 @@ export function useTrackProgress(id: string, ref: RefObject<HTMLElement | null>)
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    let raf = 0;
-    const measure = () => {
-      raf = 0;
-      const r = el.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const seen = (vh - r.top) / (r.height + vh * 0.25);
-      set(id, Math.min(1, Math.max(0, seen)));
-    };
-    const onScroll = () => {
-      if (!raf) raf = requestAnimationFrame(measure);
-    };
-    measure();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      cancelAnimationFrame(raf);
-    };
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry && entry.isIntersecting) {
+          const ratio = Math.round(entry.intersectionRatio * 5) / 5;
+          set(id, Math.max(0.1, ratio));
+        }
+      },
+      { threshold: [0.1, 0.25, 0.5, 0.75, 1.0] }
+    );
+    io.observe(el);
+    return () => io.disconnect();
   }, [id, ref]);
 }

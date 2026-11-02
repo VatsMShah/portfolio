@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { profile } from '../data/portfolio';
 import { useReducedMotionPref } from '../hooks/useMedia';
 import { EASE, Magnetic } from './fx';
+import { SeriesMark } from './Poster';
 
 /**
  * The signature moment:
@@ -80,9 +81,12 @@ export default function OpeningSequence({ onDone }: { onDone: () => void }) {
         )}
       </AnimatePresence>
 
+      {/* backdrop vignette */}
+      <div aria-hidden className="absolute inset-0 z-0 bg-[radial-gradient(70%_60%_at_50%_40%,transparent_30%,rgba(0,0,0,0.85)_100%)]" />
+
       {/* portrait */}
       <motion.div
-        className="absolute inset-x-0 bottom-0 z-0 mx-auto flex h-[68vh] max-w-[900px] items-end justify-center"
+        className="absolute inset-x-0 bottom-0 z-[2] mx-auto flex h-[68vh] max-w-[900px] items-end justify-center"
         initial={{ opacity: 0, scale: 1.12, filter: 'blur(18px) brightness(0.3)' }}
         animate={beat >= 4 ? { opacity: 1, scale: 1, filter: 'blur(0px) brightness(1)' } : {}}
         transition={{ duration: 1.6, ease: EASE }}
@@ -92,11 +96,9 @@ export default function OpeningSequence({ onDone }: { onDone: () => void }) {
           srcSet={profile.portrait.srcSet}
           sizes="(max-width: 768px) 100vw, 900px"
           alt={profile.portrait.alt}
-          className="h-full w-auto max-w-none object-contain object-bottom [mask-image:linear-gradient(to_bottom,black_55%,transparent_98%)]"
-
+          className="h-full w-auto max-w-none object-contain object-bottom [mask-image:linear-gradient(to_bottom,black_85%,transparent_100%)]"
         />
       </motion.div>
-      <div aria-hidden className="absolute inset-0 z-[1] bg-[radial-gradient(70%_60%_at_50%_40%,transparent_30%,rgba(0,0,0,0.85)_100%)]" />
 
       {/* title */}
       <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-4 text-center">
@@ -109,14 +111,14 @@ export default function OpeningSequence({ onDone }: { onDone: () => void }) {
         >
           {profile.firstName}
         </motion.h1>
-        <motion.p
-          className="font-sans text-sm font-bold text-crimson-2 [text-shadow:0_2px_20px_rgba(0,0,0,0.9)] sm:text-lg"
-          initial={{ opacity: 0, letterSpacing: '1.4em' }}
-          animate={beat >= 3 ? { opacity: 1, letterSpacing: '0.7em', y: beat >= 4 ? '-30vh' : 0 } : {}}
+        <motion.div
+          className="mt-2 text-xl sm:text-2xl"
+          initial={{ opacity: 0 }}
+          animate={beat >= 3 ? { opacity: 1, y: beat >= 4 ? '-30vh' : 0 } : {}}
           transition={{ duration: 1.1, ease: EASE }}
         >
-          {profile.seriesTag}
-        </motion.p>
+          <SeriesMark />
+        </motion.div>
       </div>
 
       {/* role + play */}

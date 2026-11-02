@@ -24,17 +24,7 @@ html {
   position: relative;
   background: var(--color-ink);
   -webkit-text-size-adjust: 100%;
-}
-
-html.lenis,
-html.lenis body {
-  height: auto;
-}
-.lenis.lenis-smooth {
-  scroll-behavior: auto !important;
-}
-.lenis.lenis-stopped {
-  overflow: hidden;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -58,23 +48,15 @@ body {
   padding-right: var(--gutter);
 }
 
-/* Film grain — a single fixed layer, cheap and subtle */
+/* Film grain — subtle static layer without GPU-churning infinite animation */
 .grain {
   position: fixed;
-  inset: -50%;
+  inset: 0;
   pointer-events: none;
   z-index: 90;
-  opacity: 0.055;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  animation: grain 1.2s steps(6) infinite;
-}
-@keyframes grain {
-  0% { transform: translate(0, 0); }
-  20% { transform: translate(-3%, 2%); }
-  40% { transform: translate(2%, -3%); }
-  60% { transform: translate(-2%, -1%); }
-  80% { transform: translate(3%, 3%); }
-  100% { transform: translate(0, 0); }
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  transform: translateZ(0);
 }
 
 /* Hide scrollbars on horizontal rails while keeping them scrollable */
@@ -87,12 +69,11 @@ body {
   display: none;
 }
 
-/* Custom cursor: hide the native one only when ours is active */
-.has-custom-cursor,
-.has-custom-cursor a,
-.has-custom-cursor button,
-.has-custom-cursor [role='button'] {
-  cursor: none;
+/* Native hardware cursor: instant 0ms latency, zero frame drops */
+button,
+a,
+[role='button'] {
+  cursor: pointer;
 }
 
 .text-outline {

@@ -1,25 +1,22 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AnimatePresence, motion, useMotionValueEvent, useScroll } from 'framer-motion';
-import { sectionMeta, viewerProfiles, type ProfileId, type SectionId } from '../data/portfolio';
+import { sectionMeta, type SectionId } from '../data/portfolio';
 import { useSmoothScroll } from '../hooks/smoothScroll';
 import { SeriesMark } from './Poster';
-import { ProfileAvatar } from './ProfileSelector';
 import { EASE } from './fx';
 
-export default function Navbar({ order, profileId, onSwitch }: { order: SectionId[]; profileId: ProfileId; onSwitch: (id: ProfileId) => void }) {
+export default function Navbar({ order }: { order: SectionId[] }) {
   const { scrollY } = useScroll();
   const [solid, setSolid] = useState(false);
   const [hidden, setHidden] = useState(false);
-  const [menu, setMenu] = useState(false);
   const [mobileNav, setMobileNav] = useState(false);
   const [active, setActive] = useState<string>('top');
   const { scrollTo } = useSmoothScroll();
-  const menuRef = useRef<HTMLDivElement>(null);
 
   useMotionValueEvent(scrollY, 'change', (y) => {
     const prev = scrollY.getPrevious() ?? 0;
     setSolid(y > 40);
-    setHidden(y > 400 && y > prev && !menu && !mobileNav);
+    setHidden(y > 400 && y > prev && !mobileNav);
   });
 
   useEffect(() => {
@@ -37,21 +34,10 @@ export default function Navbar({ order, profileId, onSwitch }: { order: SectionI
     return () => io.disconnect();
   }, [order]);
 
-  useEffect(() => {
-    if (!menu) return;
-    const close = (e: PointerEvent) => {
-      if (!menuRef.current?.contains(e.target as Node)) setMenu(false);
-    };
-    window.addEventListener('pointerdown', close);
-    return () => window.removeEventListener('pointerdown', close);
-  }, [menu]);
-
   const go = (id: string) => {
     setMobileNav(false);
     scrollTo(`#${id}`, { offset: id === 'top' ? 0 : -64 });
   };
-
-  const current = viewerProfiles.find((p) => p.id === profileId)!;
 
   return (
     <motion.header
@@ -76,61 +62,23 @@ export default function Navbar({ order, profileId, onSwitch }: { order: SectionI
           </nav>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <button
             type="button"
             onClick={() => go('contact')}
-            className="hidden rounded-full border border-white/15 px-4 py-1.5 text-xs font-semibold tracking-[0.14em] text-bone transition hover:border-crimson-2 hover:text-crimson-2 sm:block"
+            className="rounded-full border border-white/20 bg-white/5 px-4 py-1.5 text-xs font-semibold tracking-[0.14em] text-bone transition hover:border-crimson hover:bg-crimson/10 hover:text-crimson-2"
           >
             LET&apos;S BUILD
           </button>
-          <div className="relative" ref={menuRef}>
-            <button
-              type="button"
-              onClick={() => setMenu((m) => !m)}
-              aria-haspopup="menu"
-              aria-expanded={menu}
-              aria-label={`Viewing as ${current.name}. Switch profile`}
-              className="flex items-center gap-2 rounded-md p-1"
-            >
-              <ProfileAvatar id={profileId} size="sm" />
-              <motion.span animate={{ rotate: menu ? 180 : 0 }} className="text-[10px] text-mist">
-                ▼
-              </motion.span>
-            </button>
-            <AnimatePresence>
-              {menu && (
-                <motion.div
-                  role="menu"
-                  initial={{ opacity: 0, y: -8, scale: 0.97 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -8, scale: 0.97 }}
-                  transition={{ duration: 0.25, ease: EASE }}
-                  className="absolute right-0 top-12 w-60 origin-top-right rounded-xl border border-white/10 bg-ink-2/95 p-2 shadow-2xl backdrop-blur-xl"
-                >
-                  <p className="px-3 pb-2 pt-1 text-[10px] font-semibold tracking-[0.24em] text-smoke">WHO&apos;S WATCHING?</p>
-                  {viewerProfiles.map((p) => (
-                    <button
-                      key={p.id}
-                      role="menuitem"
-                      type="button"
-                      onClick={() => {
-                        onSwitch(p.id);
-                        setMenu(false);
-                      }}
-                      className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition hover:bg-white/5 ${p.id === profileId ? 'bg-white/[0.06]' : ''}`}
-                    >
-                      <ProfileAvatar id={p.id} size="sm" />
-                      <span>
-                        <span className="block text-sm text-bone">{p.name}</span>
-                        <span className="block text-[11px] text-smoke">{p.blurb}</span>
-                      </span>
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+          <button
+            type="button"
+            onClick={() => go('about')}
+            aria-label="About Vatsal"
+            className="relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-md ring-1 ring-white/20 transition hover:ring-crimson"
+            style={{ background: 'radial-gradient(circle at 50% 30%, #7a0f24, #1a0509)' }}
+          >
+            <img src="/assets/portrait-420.webp" alt="Vatsal Nagda" className="absolute inset-x-0 bottom-0 mx-auto h-[115%] w-auto max-w-none -translate-x-[3%] object-cover object-top" />
+          </button>
           <button
             type="button"
             className="flex h-10 w-10 flex-col items-center justify-center gap-1.5 lg:hidden"
